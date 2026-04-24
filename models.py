@@ -1,4 +1,6 @@
 # Developement and train of multiple classfiication models into pipelines and merge into ensemble model
+from matplotlib import pyplot as plt
+
 from data import Data
 
 from sklearn.neighbors import KNeighborsClassifier
@@ -8,7 +10,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import VotingClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVC
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay
 
 class Models:
     def __init__(self):
@@ -83,21 +85,24 @@ class Models:
         print("ADA Score: ", score6)
         #print("SVC Score: ", score7)
         ensembleModel = VotingClassifier([('KNN', KNN), ('DTC', DTC), ('RFC', RFC), ('LRC', LRC), ('GBC', GBC), ('ADA', ADA)], voting='soft')
-        ensembleModel2 = StackingClassifier(estimators=[('KNN', KNN), ('RFC', RFC), ('DTC', DTC)], final_estimator=LogisticRegression())
-        return ensembleModel, ensembleModel2
+        #ensembleModel2 = StackingClassifier(estimators=[('KNN', KNN), ('RFC', RFC), ('DTC', DTC)], final_estimator=LogisticRegression())
+        return ensembleModel #, ensembleModel2
 
     def train(self):
-        model, model2 = self.gen()
+        model = self.gen()
         #print(self.train_y.shape)
         model.fit(self.train_x, self.train_y)
-        model2.fit(self.train_x, self.train_y)
+        #model2.fit(self.train_x, self.train_y)
         preds = model.predict(self.test_x)
-        preds2 = model2.predict(self.test_x)
+        #preds2 = model2.predict(self.test_x)
         print("Test Score 1: ", model.score(self.test_x, self.test_y))
-        print("Test Score 2: ", model2.score(self.test_x, self.test_y))
+        #print("Test Score 2: ", model2.score(self.test_x, self.test_y))
         #print("Train Score: ", model.score(self.train_x, self.train_y))
         print(classification_report(self.test_y, preds))
-        print(classification_report(self.test_y, preds2))
+        disp = ConfusionMatrixDisplay(confusion_matrix(self.test_y, preds))
+        disp.plot()
+        plt.show()
+        #print(classification_report(self.test_y, preds2))
         # (0.5983791085096803, 0.3237410071942446) --> train & test .score on model originally, needs improvement
 
 models = Models()
