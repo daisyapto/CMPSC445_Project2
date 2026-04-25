@@ -15,7 +15,7 @@ from sklearn.metrics import classification_report, confusion_matrix, ConfusionMa
 class Models:
     def __init__(self):
         self.d = Data()
-        self.train_x, self.test_x, self.train_y, self.test_y = self.d.scale()
+        self.train_x, self.test_x, self.train_y, self.test_y = self.d.feature_selection()
         print(self.test_y.shape)
         print(self.train_y.shape)
 
@@ -48,14 +48,14 @@ class Models:
         return pipe, score
 
     def GBC(self):
-        model = GradientBoostingClassifier()
+        model = GradientBoostingClassifier(n_estimators=300, learning_rate=0.05)
         pipe = Pipeline([('gb', model)])
         pipe.fit(self.train_x, self.train_y)
         score = pipe.score(self.test_x, self.test_y)
         return pipe, score
 
     def ADA(self):
-        model = AdaBoostClassifier()
+        model = AdaBoostClassifier(n_estimators=300, learning_rate=0.05)
         pipe = Pipeline([('ada', model)])
         pipe.fit(self.train_x, self.train_y)
         score = pipe.score(self.test_x, self.test_y)
@@ -95,7 +95,7 @@ class Models:
         #model2.fit(self.train_x, self.train_y)
         preds = model.predict(self.test_x)
         #preds2 = model2.predict(self.test_x)
-        print("Test Score 1: ", model.score(self.test_x, self.test_y))
+        print("Ensemble Score: ", model.score(self.test_x, self.test_y))
         #print("Test Score 2: ", model2.score(self.test_x, self.test_y))
         #print("Train Score: ", model.score(self.train_x, self.train_y))
         print(classification_report(self.test_y, preds))

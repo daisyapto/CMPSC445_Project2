@@ -57,6 +57,9 @@ class Data:
         data = [higherEdBySector,
                 higherEdInstitutions,
                 cost]
+        print(higherEdBySector.head())
+        print(higherEdInstitutions.head())
+        print(cost.head())
         return data
 
     def merge(self):
@@ -95,7 +98,7 @@ class Data:
         # Merge
         dataset = pd.concat(data, axis=0)
         #print(dataset['Category'].unique())
-        print(dataset['Category'].unique())
+        #print(dataset['Category'].unique())
 
         # Category filter - Dropped technical programs, admin offices, filtering to colleges & unis
         categories = ['Private College/University',
@@ -160,7 +163,7 @@ class Data:
         dataset['Distance to Erie (Longitude)'] = dataset["Longitude (HigherEducationBySector)"].apply(self.distance, args=("ERIE", "lon"))
 
         # County region - north, west, east, south PA vs county
-        print(dataset['County'].unique()) # Looked through all the 57 counties, mnaully divided them into sectors, created binary cols for region of institution
+        #print(dataset['County'].unique()) # Looked through all the 57 counties, mnaully divided them into sectors, created binary cols for region of institution
         NORTH = ['Luzerne', 'McKean', 'Lackawanna', 'Venango', 'Bradford', 'Crawford', 'Forest', 'Erie', 'Elk', 'Warren', 'Lycoming', 'Mercer', 'Jefferson', 'Potter', 'Cameron', 'Clarion', 'Clinton', 'Tioga', 'Wayne']
         EAST = ['Luzerne', 'Montgomery', 'York', 'Dauphin', 'Lehigh', 'Schuylkill', 'Berks', 'Lackawanna', 'Delaware', 'Bucks', 'Northampton', 'Chester', 'Bradford', 'Philadelphia', 'Lebanon', 'Lancaster', 'Northumberland', 'Lycoming', 'Columbia', 'Monroe', 'Tioga', 'Wayne']
         SOUTH = ['Franklin', 'York', 'Montgomery', 'Berks', 'Delaware', 'Bucks', 'Cambria', 'Allegheny', 'Washington', 'Chester', 'Somerset', 'Westmoreland', 'Philadelphia', 'Lebanon', 'Cumberland', 'Greene', 'Lancaster', 'Fayette', 'Adams', 'Blair', 'Huntingdon', 'Juniata']
@@ -175,7 +178,7 @@ class Data:
 
         return dataset
 
-    def clean_encode_split(self):
+    def impute_encode(self):
         dataset = self.featureEng()
         num_imputer = IterativeImputer(max_iter=15)
         cat_imputer = SimpleImputer(strategy="constant", fill_value="Other")
@@ -216,13 +219,8 @@ class Data:
                                           'State abbreviation (HD2024) (Cost)'])
         ])
 
-        print(dataset.columns)
+        #print(dataset.columns)
         dataset.to_csv("data.csv", index=False)
-
-        le = LabelEncoder()
-        cols = dataset.select_dtypes(include=['object', 'category']).columns.tolist()
-        for col in cols:
-            dataset[col] = le.fit_transform(dataset[col])
 
         x = dataset.drop(columns=['Category'], inplace=False)
         y = dataset['Category']
@@ -230,30 +228,35 @@ class Data:
         #print(y.columns)
         preprocessor.set_output(transform="pandas")
         x_imputed = preprocessor.fit_transform(x.astype(object)) # Google search AI Overview
-
-
-        print(x_imputed.shape)
-        selector = SelectKBest(k=15)
-        selector.fit(x_imputed, y)
-        print("Selector scores: ", selector.scores_)
-        print("Selector top 15: ", selector.get_feature_names_out())
-        x_new = selector.transform(x_imputed)
-
         x_imputed.to_csv("x_imputed.csv", index=False)
-        #x_new.to_csv("x_new.csv", index=False)
-        #print(x)
 
+        le = LabelEncoder()
+        cols = x_imputed.select_dtypes(include=['object', 'category']).columns
+        for col in cols:
+            x_imputed[col] = le.fit_transform(x_imputed[col])
 
-        train_x, test_x, train_y, test_y = train_test_split(x_new, y, test_size=0.05, random_state=42)
+        train_x, test_x, train_y, test_y = train_test_split(x_imputed, y, test_size=0.10, random_state=42)
         return train_x, test_x, train_y, test_y
 
     def scale(self):
-        train_x, test_x, train_y, test_y = self.clean_encode_split()
+        train_x, test_x, train_y, test_y = self.impute_encode()
 
         ss = StandardScaler()
         train_x = ss.fit_transform(train_x)
         test_x = ss.transform(test_x)
         print(train_x)
+
+        return train_x, test_x, train_y, test_y
+
+    def feature_selection(self):
+        train_x, test_x, train_y, test_y = self.scale()
+        selector = SelectKBest(k=15)
+        selector.fit(train_x, train_y)
+        print("Selector scores: ", selector.scores_)
+        print("Selector top 15: ", selector.get_feature_names_out())
+        selector.set_output(transform="pandas")
+        train_x = selector.transform(train_x)
+        test_x = selector.transform(test_x)
 
         return train_x, test_x, train_y, test_y
 
