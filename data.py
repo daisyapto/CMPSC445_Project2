@@ -244,7 +244,7 @@ class Data:
         ss = StandardScaler()
         train_x = ss.fit_transform(train_x)
         test_x = ss.transform(test_x)
-        print(train_x)
+        #print(train_x)
 
         return train_x, test_x, train_y, test_y
 
@@ -257,6 +257,15 @@ class Data:
         selector.set_output(transform="pandas")
         train_x = selector.transform(train_x)
         test_x = selector.transform(test_x)
+
+        print("Train X: ", train_x)
+        print("Train X shape: ", train_x.shape)
+        print("Test X: ", test_x)
+        print("Test X shape: ", test_x.shape)
+        print("Train Y: ", train_y)
+        print("Train Y shape: ", train_y.shape)
+        print("Test Y: ", test_y)
+        print("Test Y shape: ", test_y.shape)
 
         return train_x, test_x, train_y, test_y
 
