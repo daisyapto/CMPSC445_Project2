@@ -12,4 +12,5 @@ PASSHE (unused data):
 - https://viz.passhe.edu/t/Public/views/Enrollment-PublicFinal/TrendTables?%3AisGuestRedirectFromVizportal=y&%3Aembed=y
 
 Deployment of Project:
-https://github.com/Zainabzz/COMPSC-445_FINAL
+- https://github.com/Zainabzz/COMPSC-445_FINAL
+- https://web-production-d9c39.up.railway.app/
