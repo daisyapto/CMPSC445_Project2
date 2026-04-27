@@ -10,3 +10,6 @@ Download datatsets from the following:
 
 PASSHE (unused data):
 - https://viz.passhe.edu/t/Public/views/Enrollment-PublicFinal/TrendTables?%3AisGuestRedirectFromVizportal=y&%3Aembed=y
+
+Deployment of Project:
+https://github.com/Zainabzz/COMPSC-445_FINAL
